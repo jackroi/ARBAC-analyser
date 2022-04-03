@@ -1,2 +1,3 @@
 # ARBAC-analyser
-ARBAC role reachability verifier
+ARBAC role reachability verifier.
+
