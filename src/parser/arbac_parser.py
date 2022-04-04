@@ -4,6 +4,8 @@ TODO: describe more
 """
 
 
+from typing import Union
+import lark
 from lark import Lark, Transformer
 #import .arbac  # TODO maybe ?????
 from src.types.arbac import CanAssignRule, CanRevokeRule, UserToRole, UserToRoleAssignment, Arbac, Policy, ArbacReachability
@@ -121,15 +123,18 @@ class TreeToArbacReachability(Transformer):
 
 
 
-arbac_parser = Lark.open(grammar_filename=GRAMMAR,
-                         rel_to=__file__,
-                         parser="lalr")
-                         #transformer=TreeToArbacReachability())
+parser = Lark.open(grammar_filename=GRAMMAR,
+                   rel_to=__file__,
+                   parser="lalr")
+                   #transformer=TreeToArbacReachability())
 
 
 
 
-def parse(text: str) -> ArbacReachability:
-    tree = arbac_parser.parse(text)
-    return TreeToArbacReachability().transform(tree)
+def parse(text: str) -> "tuple[bool, Union[ArbacReachability, str]]":
+    try:
+        tree = parser.parse(text)
+        return (False, TreeToArbacReachability().transform(tree))
+    except lark.exceptions.UnexpectedInput as e:
+        return (True, e.get_context(text))
 
