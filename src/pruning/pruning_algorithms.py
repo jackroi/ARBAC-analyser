@@ -1,7 +1,7 @@
 """ARBAC role reachability pruning algoriths"""
 
 
-from src.types.arbac import CanAssignRule, CanRevokeRule, UserToRole, UserToRoleAssignment, Arbac, Policy, ArbacReachability
+from src.types.arbac import UserToRoleAssignment, Arbac, Policy, ArbacReachability
 
 
 def forward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability:
@@ -75,16 +75,51 @@ def forward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability:
     return ArbacReachability(new_arbac, arbac_reachability.goal)
 
 
-def backward_slicing(arbac: ArbacReachability) -> ArbacReachability:
+def backward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability:
     """Backward slicing"""
 
     # start with only the goal role
-    relevant_roles = set([ arbac.goal ])
+    relevant_roles = set([ arbac_reachability.goal ])
 
     # enrich the set of relevant roles TODO ...
+    prev_len = 0;
+    curr_len = len(relevant_roles)
+    while curr_len != prev_len:
+        new_relevant_roles = []
+        for rule in arbac_reachability.arbac.policy.can_assign:
+            if rule.target_role in relevant_roles:
+                new_relevant_roles.extend(rule.positive_roles + rule.negative_roles + [ rule.admin_role ])
 
-    return arbac    # TODO: cambiare
+        relevant_roles.update(new_relevant_roles)
+        prev_len = curr_len
+        curr_len = len(relevant_roles)
 
+    # TODO: controllare algoritmo per assicurarsi che siano davvero questi i casi in cui rimuovere rules
+
+    # keep only interesting can assign rules,
+    # only those that assign a role inside relevant_roles
+    valid_can_assign = lambda rule: rule.target_role in relevant_roles
+    new_can_assign = list(filter(valid_can_assign, arbac_reachability.arbac.policy.can_assign))
+
+    # keep only interesting can revoke rules
+    # only those that revoke a role inside relevant_roles
+    valid_can_revoke = lambda rule: rule.target_role in relevant_roles
+    new_can_revoke = list(filter(valid_can_revoke, arbac_reachability.arbac.policy.can_revoke))
+
+    # keep only interesting (relevant) roles
+    new_roles = list(relevant_roles)
+
+    # update user to role assignment
+    # TODO: this step is not present in the slides algoriths, but should be needed to keep user_to_role_assignment consistent
+    valid_user_to_role = lambda user_to_role: user_to_role.role in new_roles
+    new_user_to_role_assignment = list(filter(valid_user_to_role, arbac_reachability.arbac.user_to_role_assignment.user_role_list))
+
+    # build the new pruned arbac
+    arbac = Arbac(new_roles,
+                  arbac_reachability.arbac.user_list,
+                  UserToRoleAssignment(new_user_to_role_assignment),
+                  Policy(new_can_assign, new_can_revoke))
+    return ArbacReachability(arbac, arbac_reachability.goal)
 
 
 def slicing():
