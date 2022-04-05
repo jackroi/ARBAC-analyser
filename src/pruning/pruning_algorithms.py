@@ -4,9 +4,11 @@
 from src.types.arbac import CanAssignRule, CanRevokeRule, UserToRole, UserToRoleAssignment, Arbac, Policy, ArbacReachability
 
 
-def forward_slicing(arbac: Arbac) -> Arbac:
+def forward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability:
     # TODO: valutare tipo input e output, forse per rendere più simile a backward_slicing meglio ArbacReachability
     """Forward slicing"""
+
+    arbac = arbac_reachability.arbac
 
     reachable_roles = set()
 
@@ -27,7 +29,8 @@ def forward_slicing(arbac: Arbac) -> Arbac:
             # if length of intersection of positive_roles_and_admin and reachable_roles
             # is equal to length of positive_roles_and_admin, then positive_roles_and_admin
             # is a subset of reachable_roles
-            all_contained = len(positive_roles_and_admin.intersection(reachable_roles)) == len(positive_roles_and_admin)
+            all_contained = positive_roles_and_admin.issubset(reachable_roles)
+            #all_contained_old = len(positive_roles_and_admin.intersection(reachable_roles)) == len(positive_roles_and_admin)
 
             if all_contained:
                 new_reachable_roles.add(target_role)
@@ -48,7 +51,8 @@ def forward_slicing(arbac: Arbac) -> Arbac:
     valid_can_assign = lambda rule: (
         rule.admin_role in reachable_roles
         and rule.target_role in reachable_roles
-        and len(reachable_roles.intersection(rule.positive_roles)) == len(rule.positive_roles)
+        #and len(reachable_roles.intersection(rule.positive_roles)) == len(rule.positive_roles)
+        and reachable_roles.issuperset(rule.positive_roles)
     )
     new_can_assign = list(filter(valid_can_assign, arbac.policy.can_assign))
 
@@ -67,7 +71,8 @@ def forward_slicing(arbac: Arbac) -> Arbac:
     new_roles = list(reachable_roles)
 
     # build the new pruned arbac
-    return Arbac(new_roles, arbac.role_list, arbac.user_to_role_assignment, Policy(new_can_assign, new_can_revoke))
+    new_arbac = Arbac(new_roles, arbac.user_list, arbac.user_to_role_assignment, Policy(new_can_assign, new_can_revoke))
+    return ArbacReachability(new_arbac, arbac_reachability.goal)
 
 
 def backward_slicing(arbac: ArbacReachability) -> ArbacReachability:
