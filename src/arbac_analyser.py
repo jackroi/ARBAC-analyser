@@ -7,8 +7,11 @@ TODO: describe how to use this from cli
 
 
 import sys
+import typing
 from typing import List
+from src.types.arbac import ArbacReachability
 from src.parser import arbac_parser
+from src.pruning import pruning_algorithms as pruning
 
 
 def main(argv: List[str]):
@@ -38,7 +41,19 @@ def main(argv: List[str]):
         print(res)          # print contextual help (string pinpointing the error in the text)
         sys.exit(3)
 
+    res = typing.cast(ArbacReachability, res)
+
+    print("Original ARBAC")
     print(res)
+
+    print("Forward sliced ARBAC")
+    print(pruning.forward_slicing(res))
+
+    print("Backward sliced ARBAC")
+    print(pruning.backward_slicing(res))
+
+    print("Sliced ARBAC")
+    print(pruning.slicing(res))
 
 
 if __name__ == "__main__":
