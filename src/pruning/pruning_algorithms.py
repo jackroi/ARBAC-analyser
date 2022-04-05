@@ -122,6 +122,17 @@ def backward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability
     return ArbacReachability(arbac, arbac_reachability.goal)
 
 
-def slicing():
+
+def slicing(arbac_reachability: ArbacReachability) -> ArbacReachability:
     """Forward and Backward slicing combined"""
-    pass
+
+    pruned_arbac_reachability = arbac_reachability
+    changed = True
+    while changed:
+        new_pruned_arbac_reachability = forward_slicing(pruned_arbac_reachability)
+        new_pruned_arbac_reachability = backward_slicing(new_pruned_arbac_reachability)
+        changed = pruned_arbac_reachability != new_pruned_arbac_reachability    # TODO: capire se funziona
+        pruned_arbac_reachability = new_pruned_arbac_reachability
+
+    return pruned_arbac_reachability   # TODO
+
