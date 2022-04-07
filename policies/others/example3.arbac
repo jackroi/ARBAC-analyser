@@ -1,0 +1,6 @@
+Roles Teacher Student TA target Pippo Wow ;
+Users stefano alice bob user3 user4 user5 ;
+UA <stefano,Teacher> <alice,TA> <user4,Pippo> <user3,Pippo> <user4,Wow> <user3,Wow>;
+CR <Teacher,Student> <Teacher,TA> <Teacher, Wow> <Teacher,Pippo> <Wow,Pippo>;
+CA <Teacher,-Teacher&-TA,Student> <Teacher,-Student,TA> <Teacher,TA&-Student,Teacher> <Teacher,Student&TA,target> <TA,Pippo,Wow> <Student,Wow,Pippo>;
+Goal target ;
