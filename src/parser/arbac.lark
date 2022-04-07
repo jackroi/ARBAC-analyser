@@ -1,89 +1,46 @@
-?start: spec
+// Grammar for a .arbac file
 
+?start: arbac
 
-
-
-
-spec: roles_statement users_statement ua_statement cr_statement ca_statement goal_statement
-
-
+arbac: roles_statement users_statement ua_statement cr_statement ca_statement goal_statement
 
 roles_statement: "Roles" role_list ";"
-
-
-
 users_statement: "Users" user_list ";"
-
-
-
 ua_statement: "UA" ua_list ";"
-
-
-
 cr_statement: "CR" cr_list ";"
-
-
-
 ca_statement: "CA" ca_list ";"
-
-
-
 goal_statement: "Goal" goal ";"
-
-
-
-
 
 role_list: role+
 
 user_list: user+
 
 ua_list: user_role+
-
 user_role: "<" user "," role ">"
 
 cr_list: cr*
-
 cr: "<" user "," role ">"
 
 ca_list: ca*
-
 ca: "<" role "," precondition "," role ">"
 
 precondition: trivial_cond
-
             | condition_list
-
 trivial_cond: "TRUE"
-
 condition_list: cond_role ("&" cond_role)*
-
 cond_role: pos_role | neg_role
-
 neg_role: "-" role
-
 pos_role: role
 
 role: name
-
 user: name
-
 goal: name
-
-?name: CNAME
-
+name: CNAME
 
 
-
-
-// imports CNAME from library
-
+// Imports CNAME (alphanumeric strings with unerscore) from library
 %import common.CNAME
 
-
-
 // Disregard spaces in text
-
 %import common.WS
-
 %ignore WS
