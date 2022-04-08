@@ -1,4 +1,13 @@
-"""ARBAC role reachability."""
+"""ARBAC role reachability.
+
+This module exports only one function, `role_reachability`.
+
+    Typical usage example:
+
+    arbac_reachability = ArbacReachability(...)
+    reachable = role_reachability(arbac_reachability)
+    print("Reachable" if reachable else "Not reachable")
+"""
 
 
 from typing import List
@@ -57,7 +66,7 @@ def role_reachability(arbac_reachability: ArbacReachability ) -> bool:
             # for each user
             for user in arbac_reachability.arbac.user_list:
                 # try to execute the assignment and add the new user-to-role assignment to the queue
-                new_user_to_role_assignment = assign(user_to_role_assignment, can_assign_rule, user)
+                new_user_to_role_assignment = _assign(user_to_role_assignment, can_assign_rule, user)
                 # add it to the queue only if it is different from the parent one
                 if user_to_role_assignment != new_user_to_role_assignment:
                     to_process_queue.append(new_user_to_role_assignment)
@@ -67,7 +76,7 @@ def role_reachability(arbac_reachability: ArbacReachability ) -> bool:
             # for each user
             for user in arbac_reachability.arbac.user_list:
                 # try to execute the revocation and add the new user-to-role assignment to the queue
-                new_user_to_role_assignment = revoke(user_to_role_assignment, can_revoke_rule, user)
+                new_user_to_role_assignment = _revoke(user_to_role_assignment, can_revoke_rule, user)
                 # add it to the queue only if it is different from the parent one
                 if user_to_role_assignment != new_user_to_role_assignment:
                     to_process_queue.append(new_user_to_role_assignment)
@@ -75,7 +84,7 @@ def role_reachability(arbac_reachability: ArbacReachability ) -> bool:
     return False
 
 
-def assign(user_to_role_assignment: UserToRoleAssignment, can_assign_rule: CanAssignRule, target_user: str):
+def _assign(user_to_role_assignment: UserToRoleAssignment, can_assign_rule: CanAssignRule, target_user: str):
     """Tries to apply the can assign rule to the target_user.
 
     Condition to apply the can assign rule:
@@ -128,7 +137,7 @@ def assign(user_to_role_assignment: UserToRoleAssignment, can_assign_rule: CanAs
         return user_to_role_assignment
 
 
-def revoke(user_to_role_assignment: UserToRoleAssignment, can_revoke_rule: CanRevokeRule, target_user: str):
+def _revoke(user_to_role_assignment: UserToRoleAssignment, can_revoke_rule: CanRevokeRule, target_user: str):
     """Tries to apply the can revoke rule to the target_user.
 
     Condition to apply the can revoke rule:
