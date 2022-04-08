@@ -5,7 +5,7 @@
 
 import sys
 
-from arbac_analyser.cli import main
+from arbac_analyser.arbac_analyser_cli import main
 
 
 if __name__ == "__main__":
