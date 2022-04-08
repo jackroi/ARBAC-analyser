@@ -164,7 +164,6 @@ def _revoke(user_to_role_assignment: UserToRoleAssignment, can_revoke_rule: CanR
 
     if admin_present:
         # all conditions met: build and return the new user-to-role assignment
-        # TODO: fix type error (probably auto-fixes when fixing imports)
         new_user_role_list = set(filter(
             lambda user_role: user_role.user != target_user or user_role.role != can_revoke_rule.target_role,
             user_to_role_assignment.user_role_list
