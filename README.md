@@ -39,6 +39,11 @@ user-to-role assignment and applying the rules in the ARBAC policy.
 
 This program parses the specification of an ARBAC role reachability problem and
 returns its solution (true or false).
+It is meant to analyse small ARBAC policies, and it's not adapt to be used with larger ones.
+Note that the role reachability problem is PSPACE-complete.
+This project uses some pruning algorithms (forward slicing, backward slicing, and a combination
+of both) to simplify the input ARBAC role reachability problem, but pruning it's not sufficient
+to obtain satisfactory running times for complex policies.
 
 This project was developed for the "Security 2" course of the Computer Science
 master degree programme of Ca' Foscari University of Venice.
