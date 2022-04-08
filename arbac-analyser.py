@@ -4,6 +4,7 @@
 
 
 import sys
+
 from arbac_analyser.cli import main
 
 
