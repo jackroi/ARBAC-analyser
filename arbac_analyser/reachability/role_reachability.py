@@ -11,7 +11,11 @@ This module exports only one function, `role_reachability`.
 
 
 from typing import List
-from src.types.arbac import Arbac, Policy, ArbacReachability, UserToRoleAssignment, CanAssignRule, CanRevokeRule, UserToRole
+
+from arbac_analyser.types.arbac import (
+    ArbacReachability, UserToRoleAssignment,
+    UserToRole, CanAssignRule, CanRevokeRule
+)
 
 
 def role_reachability(arbac_reachability: ArbacReachability ) -> bool:

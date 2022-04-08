@@ -1,27 +1,27 @@
-#!/usr/bin/env python3
+"""ARBAC analyser command line interface.
 
-"""ARBAC analyser: role reachability verifier.
-
-Checks the reachability of a goal role in an ARBAC system.
+Checks the reachability of a goal role in an ARBAC system
+provided as input.
 
 Usage:
-    python3 src/arbac_analyser.py [policy.arbac]
+    ./arbac-analyser.py [policy.arbac]
 
-1) Pass .arbac file as parameter:
-    python3 src/arbac_analyser.py policies/policy1.arbac
+- Pass .arbac file as parameter:
+    ./arbac-analyser.py policies/policy1.arbac
 
-2) Pass .arbac file content through stdin:
-    cat policies/policy1.arbac | python3 src/arbac_analyser.py
+- Pass .arbac file content through stdin:
+    cat policies/policy1.arbac | ./arbac-analyser.py
 """
 
 
 import sys
 import typing
 from typing import List
+
 from .types.arbac import ArbacReachability
 from .parser import arbac_parser
 from .pruning import pruning_algorithms as pruning
-from .reachability import role_reachability
+from .reachability import role_reachability as reachability
 
 
 def main(argv: List[str]):
@@ -88,9 +88,5 @@ def main(argv: List[str]):
     print(sliced_arbac_reachability, "\n")
 
     # verify role reachability
-    reachable = role_reachability.role_reachability(sliced_arbac_reachability)
+    reachable = reachability.role_reachability(sliced_arbac_reachability)
     print("Reachable" if reachable else "Not reachable")
-
-
-if __name__ == "__main__":
-    main(sys.argv)

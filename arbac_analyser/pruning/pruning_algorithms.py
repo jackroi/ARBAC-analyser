@@ -19,7 +19,7 @@ This module exports 3 functions:
 """
 
 
-from src.types.arbac import UserToRoleAssignment, Arbac, Policy, ArbacReachability
+from arbac_analyser.types.arbac import UserToRoleAssignment, Arbac, Policy, ArbacReachability
 
 
 def forward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability:

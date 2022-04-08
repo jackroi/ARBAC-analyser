@@ -15,9 +15,14 @@ This module exports only one function, `parse`.
 
 
 from typing import Union
+
 import lark
 from lark import Lark, Transformer
-from src.types.arbac import CanAssignRule, CanRevokeRule, UserToRole, UserToRoleAssignment, Arbac, Policy, ArbacReachability
+
+from arbac_analyser.types.arbac import (
+    CanAssignRule, CanRevokeRule, UserToRole,
+    UserToRoleAssignment, Arbac, Policy, ArbacReachability
+)
 
 
 # path of the lark grammar relative to this file
@@ -96,7 +101,7 @@ class __TreeToArbacReachability(Transformer):
 
     def cond_role(self, children): return children[0]
 
-    def trivial_cond(self, children): return None
+    def trivial_cond(self, _): return None
 
     def neg_role(self, children): return ('neg', children[0])
 
