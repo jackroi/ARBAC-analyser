@@ -2,60 +2,95 @@
 
 """ARBAC analyser: role reachability verifier.
 
-TODO: describe how to use this from cli
+Checks the reachability of a goal role in an ARBAC system.
+
+Usage:
+    python3 src/arbac_analyser.py [policy.arbac]
+
+1) Pass .arbac file as parameter:
+    python3 src/arbac_analyser.py policies/policy1.arbac
+
+2) Pass .arbac file content through stdin:
+    cat policies/policy1.arbac | python3 src/arbac_analyser.py
 """
 
 
 import sys
 import typing
 from typing import List
-from src.types.arbac import ArbacReachability
-from src.parser import arbac_parser
-from src.pruning import pruning_algorithms as pruning
+from .types.arbac import ArbacReachability
+from .parser import arbac_parser
+from .pruning import pruning_algorithms as pruning
+from .reachability import role_reachability
 
 
 def main(argv: List[str]):
-    """Main"""
+    """Main: Reads, parses, prunes, and checks role reachability.
 
+    Reads .arbac file content from file or stdin, parses it,
+    and if no error occurs, runs an ARBAC pruning algorithm
+    (a combination of forward and backward slicing algorithms),
+    and then runs the role reachability test.
+
+    Args:
+        argv: Argument list:
+            argv[0]: program name;
+            argv[1]: path to .arbac file (optional).
+    """
+
+    # handle cli parameters
     argc = len(argv)
 
     if argc > 2:
+        # too many parameters
         print(f"Too many parameters, usage: {argv[0]} [policy.arbac]", file=sys.stderr)
         sys.exit(1)
 
     if argc == 1:
+        # read from stdin
         text = sys.stdin.read()
     else:
+        # read from given file
         filename = argv[1]
         try:
             with open(filename) as f:
                 text = f.read()
         except FileNotFoundError:
+            # file not found
             print(f"File {filename} not found", file=sys.stderr)
             sys.exit(2)
 
 
+    # try to parse the input text
     err, res = arbac_parser.parse(text)
     if err:
+        # an error occurred while parsing
+        # print error message with a contextual help pinpointing the error in the text
         print("Parse error: unexpected token", file=sys.stderr)
-        print(res)          # print contextual help (string pinpointing the error in the text)
+        print(res, file=sys.stderr)
         sys.exit(3)
 
+    # the parse result: ArbacReachability instance
     res = typing.cast(ArbacReachability, res)
 
-    print("Original ARBAC")
-    print(res)
+    print("Input ARBAC\n")
+    print(res, "\n")
 
-    print("Forward sliced ARBAC")
-    print(pruning.forward_slicing(res))
+    # print("Forward sliced ARBAC")
+    # print(pruning.forward_slicing(res))
 
-    print("Backward sliced ARBAC")
-    print(pruning.backward_slicing(res))
+    # print("Backward sliced ARBAC")
+    # print(pruning.backward_slicing(res))
 
-    print("Sliced ARBAC")
-    print(pruning.slicing(res))
+    # slice arbac reachability problem
+    print("Sliced ARBAC\n")
+    sliced_arbac_reachability = pruning.slicing(res)
+    print(sliced_arbac_reachability, "\n")
+
+    # verify role reachability
+    reachable = role_reachability.role_reachability(sliced_arbac_reachability)
+    print("Reachable" if reachable else "Not reachable")
 
 
 if __name__ == "__main__":
     main(sys.argv)
-
