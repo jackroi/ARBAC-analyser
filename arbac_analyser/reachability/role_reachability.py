@@ -18,7 +18,7 @@ from arbac_analyser.types.arbac import (
 )
 
 
-def role_reachability(arbac_reachability: ArbacReachability ) -> bool:
+def role_reachability(arbac_reachability: ArbacReachability) -> bool:
     """Solves the given ARBAC role reachability problem.
 
     Generates all the possible user-to-role assignment, checking if

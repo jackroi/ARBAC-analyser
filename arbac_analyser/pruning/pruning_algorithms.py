@@ -26,7 +26,7 @@ def forward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability:
     """Prunes the ArbacReachability using the forward slicing algorithm.
 
     Computes an over-approximation of the reachable roles,
-    and then simplify the ARBAC system according to it,
+    and then simplifies the ARBAC system according to it,
     in a way to preserve the solution to the role reachability
     problem.
 
@@ -115,7 +115,7 @@ def backward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability
     """Prunes the ArbacReachability using the backward slicing algorithm.
 
     Computes an over-approximation of the relevant roles to assign
-    the goal, and then simplify the ARBAC system according to it,
+    the goal, and then simplifies the ARBAC system according to it,
     in a way to preserve the solution to the role reachability
     problem.
 
