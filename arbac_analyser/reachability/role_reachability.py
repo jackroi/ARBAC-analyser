@@ -10,7 +10,7 @@ This module exports only one function, `role_reachability`.
 """
 
 
-from typing import List
+from typing import List, Set
 
 from arbac_analyser.types.arbac import (
     ArbacReachability, UserToRoleAssignment,
@@ -35,8 +35,9 @@ def role_reachability(arbac_reachability: ArbacReachability) -> bool:
 
     # queue of the user-to-role assignments that have still to be processed
     to_process_queue: List[UserToRoleAssignment] = []
-    # list of the user-to-role assignments already processed
-    visited: List[UserToRoleAssignment] = []
+    # set of the user-to-role assignments already processed
+    # set because it is faster than list when comes to searching
+    visited: Set[UserToRoleAssignment] = set()
 
     # add initial user-to-role assignment to the queue
     to_process_queue.append(arbac_reachability.arbac.user_to_role_assignment)
@@ -51,7 +52,7 @@ def role_reachability(arbac_reachability: ArbacReachability) -> bool:
             continue
 
         # mark the user-to-role assignment as visited, by inserting it into the visited list
-        visited.append(user_to_role_assignment)
+        visited.add(user_to_role_assignment)
 
         # check if any user has the goal role
         goal_reached = any(user_role.role == arbac_reachability.goal
@@ -133,9 +134,9 @@ def _assign(user_to_role_assignment: UserToRoleAssignment, can_assign_rule: CanA
         and not already_have_role):
 
         # all conditions met: build and return the new user-to-role assignment
-        new_user_role_list = user_to_role_assignment.user_role_list.copy()
+        new_user_role_list = set(user_to_role_assignment.user_role_list)
         new_user_role_list.add(UserToRole(target_user, can_assign_rule.target_role))
-        return UserToRoleAssignment(new_user_role_list)
+        return UserToRoleAssignment(frozenset(new_user_role_list))
     else:
         # some conditions not met: return the old user-to-role assignment
         return user_to_role_assignment
@@ -164,7 +165,7 @@ def _revoke(user_to_role_assignment: UserToRoleAssignment, can_revoke_rule: CanR
 
     if admin_present:
         # all conditions met: build and return the new user-to-role assignment
-        new_user_role_list = set(filter(
+        new_user_role_list = frozenset(filter(
             lambda user_role: user_role.user != target_user or user_role.role != can_revoke_rule.target_role,
             user_to_role_assignment.user_role_list
         ))

@@ -55,7 +55,7 @@ class __TreeToArbacReachability(Transformer):
 
     def users_statement(self, children): return children[0]
 
-    def ua_statement(self, children): return UserToRoleAssignment(set(children[0]))
+    def ua_statement(self, children): return UserToRoleAssignment(frozenset(children[0]))
 
     def cr_statement(self, children): return children[0]
 

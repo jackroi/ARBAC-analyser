@@ -177,7 +177,7 @@ def backward_slicing(arbac_reachability: ArbacReachability) -> ArbacReachability
     # update user-to-role assignment
     # keep only user-to-role with valid roles (roles not removed in the previous step)
     valid_user_to_role = lambda user_to_role: user_to_role.role in new_roles
-    new_user_to_role_assignment = set(
+    new_user_to_role_assignment = frozenset(
         filter(valid_user_to_role,
                arbac_reachability.arbac.user_to_role_assignment.user_role_list)
     )

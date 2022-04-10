@@ -12,7 +12,7 @@ This module exports the following classes:
 
 
 from dataclasses import dataclass
-from typing import List, Set
+from typing import List, FrozenSet
 
 
 @dataclass(frozen=True)
@@ -31,15 +31,18 @@ class UserToRole:
     role: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class UserToRoleAssignment:
     """ARBAC user-to-role assignment.
 
+    It is an immutable dataclass (so it has an implicit __hash__ method,
+    and can be stored into sets).
+
     Attributes:
-        user_role_list: Set of UserToRole objects.
+        user_role_list: Immutable set of UserToRole objects.
     """
 
-    user_role_list: Set[UserToRole]
+    user_role_list: FrozenSet[UserToRole]
 
 
 @dataclass
