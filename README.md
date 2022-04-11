@@ -4,7 +4,6 @@
 
   [![GitHub last commit](https://img.shields.io/github/last-commit/jackroi/ARBAC-analyser?style=for-the-badge)](https://github.com/jackroi/ARBAC-analyser/commits/master)
   [![GitHub issues](https://img.shields.io/github/issues/jackroi/ARBAC-analyser?style=for-the-badge)](https://github.com/jackroi/ARBAC-analyser/issues)
-  [![GitHub pull requests](https://img.shields.io/github/issues-pr/jackroi/ARBAC-analyser?style=for-the-badge)](https://github.com/jackroi/ARBAC-analyser/pulls)
   [![GitHub](https://img.shields.io/github/license/jackroi/ARBAC-analyser?style=for-the-badge)](/LICENSE)
 
 </div>
