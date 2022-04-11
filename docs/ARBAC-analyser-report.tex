@@ -1,0 +1,161 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue,
+}
+
+\title{ARBAC analyser}
+\author{Giacomo Rosin (875724)}
+\date{\today}
+
+\renewcommand{\arraystretch}{1.5}
+
+\begin{document}
+
+\maketitle
+
+\sloppy         % fix overfull \hbox
+
+
+\section{Introduction}
+The goal of the assignment was to build an ARBAC (Administrative Role Based Access Control)
+analyser for small policies, able to parse a role reachability problem specification and return
+its solution (true or false).
+
+
+\section{Usage}
+The ARBAC analyser can be used as follows:
+\begin{lstlisting}[]
+ python3 arbac-analyser.py [policy.arbac]
+\end{lstlisting}
+
+\noindent
+When the path to a policy is given as parameter, the analyser will read the specified file:
+\begin{lstlisting}[]
+ python3 arbac-analyser.py ./policies/policy1.arbac
+\end{lstlisting}
+
+\noindent
+When no path is provided, the analyser will read the ARBAC specification from standard input:
+\begin{lstlisting}[]
+ cat ./policies/policy1.arbac | python3 arbac-analyser.py
+\end{lstlisting}
+
+\noindent
+Note that this program need a version of Python greater or equal to 3.8, and the used
+third party packages (only \lstinline[columns=fixed]{lark}) need to be installed.
+You can obtain them by running:
+\begin{lstlisting}[]
+ pip install -r requirements.txt
+\end{lstlisting}
+
+
+\section{Implementation details}
+
+\subsection{Parsing}
+The ARBAC reachability problem specifications are parsed using a context-free grammar written
+using \href{https://github.com/lark-parser/lark}{Lark} (a parsing toolkit for Python),
+that uses \href{https://www.wikiwand.com/en/Extended_Backus-Naur_form}{EBNF}-inspired grammars.
+If the parsing is successful, a parse tree is generated. By defining a subclass of a
+\lstinline[columns=fixed]{lark.Transformer} you can transform the parse tree into a
+data structure of your choice.
+The grammar for the ARBAC role reachability specification language is defined in the
+\lstinline[columns=fixed]{arbac_analyser/parser/arbac.lark} file, and the related
+Python code is in the \lstinline[columns=fixed]{arbac_analyser/parser/arbac_parser.py} file.
+
+The data structures used to store the parsed information are defined in the
+\lstinline[columns=fixed]{arbac_analyser/types/arbac.py} file.
+There is only one thing worth noting about data structures.
+The user-to-role assignment is modelled through a set, in particular an immutable set,
+of user-to-role associations.
+A set is used, and not a list, since the ordering of the user-to-role association
+is not important, and thus the semantic of the == operator is the one wanted
+(same elements contained, regardless of the order). Other more efficient data structures
+could be used, but set was the simpler one.
+An immutable set (a Python "\lstinline[columns=fixed]{frozenset}") is used because,
+later, the set of user-to-role assignments needs to be put into another set (the "visited" set),
+for the role reachability algorithm (normal set can't be stored in another set). \\
+The other data structures are quite straightforward to understand.
+
+\subsection{Pruning algorithms}
+Role reachability is a PSPACE-complete problem. So you need to use some technique
+to deal with complex ARBAC policies.
+To simplify the input policies, some pruning algorithm have been implemented.
+Pruning algorithms permit to reduce the search space, without restricting the ARBAC model,
+and without relying on approximate analysis techniques.
+The pruning algorithms implemented are the following:
+\begin{itemize}
+\item \emph{Forward slicing}: Computes an over-approximation of the reachable roles,
+and then simplifies the ARBAC system according to it, in a way to preserve the
+solution to the role reachability problem.
+
+\item \emph{Backward slicing}: Computes an over-approximation of the relevant roles to
+assign the goal, and then simplifies the ARBAC system according to it, in a way to preserve
+the solution to the role reachability problem.
+
+\item \emph{Slicing}: Applies repetitively the forward slicing algorithm, followed by the backward
+slicing algorithm, until the ARBAC system stabilises to a fixed point.
+\end{itemize}
+
+\subsection{Role reachability}
+The algorithm implemented to solve role reachability searches all the possible user-to-role
+assignments of the given ARBAC system, stopping when no new states are found, returning false,
+or when a state that contains the goal role is found, returning true.
+To visit all the state space, the implemented algorithm keeps a queue of user-to-role assignments
+to analyse and a set of visited user-to-role assignments (set has been choosen since the Python
+implementation can check the presence of an item in O(1) on average, while still keeping the
+insertion time O(1) on average). At the beginning, the queue contains
+only the initial state. At every iteration over the queue, an user-to-role assignment is extracted
+and, if it was not already visited, the presence of a user with the goal is tested. Then if it is
+not present, the state is added to the list of visited states and all the possible reachable
+states are generated, and added to the queue. To generate all the possible new user-to-role
+assignments reachable from the current user-to-role assignment, for each pair target user
+and policy rule (can assign or can revoke) a new user-to-role assignment is generated if
+the preconditions to apply the rule are met.
+
+
+\section{Results}
+In the following table are listed the solutions to the 8 reachability problems
+(\lstinline[columns=fixed]|policies/policy{1..8}.arbac|), along with
+the time and the memory needed to solve them.
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{1\textwidth} {
+  | >{\centering\arraybackslash}X
+  | >{\centering\arraybackslash}X
+  | >{\centering\arraybackslash}X
+  | >{\centering\arraybackslash}X | }
+ \hline
+ \textbf{Policy} & \textbf{Result} & \textbf{Time (s)} & \textbf{Memory (Mb)} \\
+ \hline
+ Policy 1 & Reachable & 0.30 & 39.044 \\
+ \hline
+ Policy 2 & Not reachable & 28.28 & 215.352 \\
+ \hline
+ Policy 3 & Reachable & 0.09 & 17.916 \\
+ \hline
+ Policy 4 & Reachable & 0.40 & 50.336 \\
+ \hline
+ Policy 5 & Not reachable & 390.06 & 1492.268 \\
+ \hline
+ Policy 6 & Reachable & 0.10 & 20.400 \\
+ \hline
+ Policy 7 & Reachable & 0.29 & 32.560 \\
+ \hline
+ Policy 8 & Not reachable & 379.49 & 1492.440 \\
+ \hline
+\end{tabularx}
+\caption{Analysis of the 8 policies}
+\label{tab:results}
+\end{table}
+
+\noindent
+Time and memory usage measured using Gnu time (\lstinline[columns=fixed]{/usr/bin/time})
+and averaged over 3 runs on an Intel i5-8400.
+
+\end{document}
