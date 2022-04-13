@@ -110,7 +110,7 @@ to analyse and a set of visited user-to-role assignments (set has been choosen s
 implementation can check the presence of an item in O(1) on average, while still keeping the
 insertion time O(1) on average). At the beginning, the queue contains
 only the initial state. At every iteration over the queue, an user-to-role assignment is extracted
-and, if it was not already visited, the presence of a user with the goal is tested. Then if it is
+and, if it was not already visited, the presence of a user with the goal role is tested. Then if it is
 not present, the state is added to the list of visited states and all the possible reachable
 states are generated, and added to the queue. To generate all the possible new user-to-role
 assignments reachable from the current user-to-role assignment, for each pair target user
